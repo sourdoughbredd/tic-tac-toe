@@ -20,19 +20,22 @@ function createPlayer(name, marker) {
 //  Methods:
 //      addPlayer(Player) - adds player as occupying player
 //      clearSquare() - clears the square of any occupying players
-function createGameSquare() {
+function createGameSquare(i) {
     return {
         occupyingPlayer: null,
+        domElem: document.getElementById(`square-${i}`), // think I need to go data attribute route to track
         addPlayer: function(Player) {
             let success = false;
             if (this.occupyingPlayer === null) { 
                 this.occupyingPlayer = Player;
+                this.domElem.textContent = Player.marker;
                 success = true;  // successful move
             }
             return success;
         },
         clearSquare: function() {
             this.occupyingPlayer = null;
+            this.domElem.textContent = "";
         }
     }
 }
@@ -48,7 +51,7 @@ const gameboard = (function () {
 
     const squares = [];
     for (let i = 0; i < 9; i++) {
-        squares.push(createGameSquare());
+        squares.push(createGameSquare(i))
     }
 
     function render() {
@@ -64,9 +67,7 @@ const gameboard = (function () {
     }
 
     function reset() {
-        for (let i = 0; i < 9; i++) {
-            squares[i] = createGameSquare();
-        }
+        squares.forEach(square => square.clearSquare());
     }
 
     return {squares, render, reset}
@@ -94,5 +95,12 @@ function playGame() {
     let turnsCount = 0;
     while (!gameOver()) {
         const currPlayer = (turnsCount % 2 === 0) ? player2 : player1;
+        let successfulMove = false;
+        while (!successfulMove) {
+            // Wait for player to choos
+            // Hmmmm I may need to rethink approach.
+        }
+        turnsCount++;
     }
+
 }

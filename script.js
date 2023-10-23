@@ -51,7 +51,7 @@ const gameboard = (function () {
 
     const squares = [];
     for (let i = 0; i < 9; i++) {
-        squares.push(createGameSquare(i))
+        squares.push(createGameSquare(i));
     }
 
     function render() {

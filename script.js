@@ -64,15 +64,41 @@ const gameboard = (function () {
         squares.push(createGameSquare());
     }
 
-    function gameOver() {
-        return squares.every(square => square.occupyingPlayer !== null);
+    function checkGameOver() {
+        let winner = null;
+        let gameOver = false;
+        // Check rows
+        for (let i = 0; i < squares.length; i += 3) {
+            const row = squares.slice(i, i+3);
+            if (row.every(square => square === row[0])) {
+                // Winning row!
+                console.log('WINNING ROW');
+                gameOver = true;
+                winner = row[0].occupyingPlayer;
+                return {gameOver, winner};
+            }
+        }
+        // Check columns
+        for (let i = 0; i < 3; i++) {
+            const col = [squares[i], squares[i+3], squares[i+6]];
+            if (col.every(square => square === col[0])) {
+                // Winning column!
+                console.log('WINNING COLUMN');
+                gameOver = true;
+                winner = col[0].occupyingPlayer;
+                return {gameOver, winner};
+            }
+        }
+
+        gameOver = squares.every(square => square.occupyingPlayer !== null); // full board without a winner
+        return {gameOver, winner};
     }
 
     function reset() {
         squares.forEach(square => square.clearSquare());
     }
 
-    return {squares, reset}
+    return {squares, checkGameOver, reset}
 })();
 
 // UI controller
@@ -110,11 +136,6 @@ const uiController = (function() {
 
 })();
 
-// Player Info
-const players = (function() {
-    let x, o;
-    
-})();
 
 // Game controller
 const gameController = (function() {
@@ -122,14 +143,6 @@ const gameController = (function() {
     let currPlayer;
     let gameStarted = false;
     let readyForMove = false;
-
-    // function getPlayerX() {
-    //     return playerX;
-    // }
-
-    // function getPlayerO() {
-    //     return playerO;
-    // }
 
     function initPlayers(playerXName, playerOName) {
         playerX = createPlayer(playerXName, 'x');
@@ -163,7 +176,17 @@ const gameController = (function() {
             const success = currPlayer.makeMove(square);
             if (success) {
                 uiController.updateGameboard();
-                nextPlayer();
+                const {gameOver, winner} = gameboard.checkGameOver();
+                if (gameOver) {
+                    readyForMove = false;
+                    if (winner === null) {
+                        console.log(`GAME OVER: It's a tie!`);
+                    } else {
+                        console.log(`GAME OVER: Winner is ${winner.name}`);
+                    }
+                } else {
+                    nextPlayer();
+                }
             }
         }
     }

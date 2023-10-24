@@ -1,10 +1,24 @@
+// Pub Sub
+const PubSub = {
+    events: {},
+    subscribe: function(eventName, fn) {
+        this.events[eventName] = this.events[eventName] || [];
+        this.events[eventName].push(fn);
+    },
+    publish: function(eventName, data) {
+        if (this.events[eventName]) {
+            this.events[eventName].forEach(fn => fn(data));
+        }
+    }
+};
+
+
 // Player Object
 //  Properties:
 //      name - name of the player
 //      marker - marker type (X or O)
 //  Methods:
 //      makeMove(square) - player makes a move
-//      setName() - sets name of the player
 //
 function createPlayer(name, marker) {
     function makeMove(square) {
@@ -20,22 +34,19 @@ function createPlayer(name, marker) {
 //  Methods:
 //      addPlayer(Player) - adds player as occupying player
 //      clearSquare() - clears the square of any occupying players
-function createGameSquare(i) {
+function createGameSquare() {
     return {
         occupyingPlayer: null,
-        domElem: document.getElementById(`square-${i}`), // think I need to go data attribute route to track
         addPlayer: function(Player) {
             let success = false;
             if (this.occupyingPlayer === null) { 
                 this.occupyingPlayer = Player;
-                this.domElem.textContent = Player.marker;
                 success = true;  // successful move
             }
             return success;
         },
         clearSquare: function() {
             this.occupyingPlayer = null;
-            this.domElem.textContent = "";
         }
     }
 }
@@ -45,62 +56,125 @@ function createGameSquare(i) {
 //  Properties:
 //      squares - array of Gameboard Square objects
 //  Methods:
-//      clearGameboard() - clear the gameboard
-//      render() - renders the gameboard (draws marker type of players occupying squares)
+//      reset() - clear the gameboard
 const gameboard = (function () {
 
     const squares = [];
     for (let i = 0; i < 9; i++) {
-        squares.push(createGameSquare(i));
+        squares.push(createGameSquare());
     }
 
-    function render() {
-        let markers = "";
-        squares.forEach(square => {
-            if (square.occupyingPlayer === null) {
-                markers += "|-|";
-            } else {
-                markers += "|" + square.occupyingPlayer.marker + "|";
-            }
-        });
-        console.log(markers)
+    function gameOver() {
+        return squares.every(square => square.occupyingPlayer !== null);
     }
 
     function reset() {
         squares.forEach(square => square.clearSquare());
     }
 
-    return {squares, render, reset}
+    return {squares, reset}
 })();
 
-// Game Controller
-// Controls the flow of the game
-// 1. Wait for user to press Start
-// 2. Get name and marker choice of each player
-// 3. Create Player objects
-// 4. Create game board
-// 5. Randomly choose someone to go first
-// 6. Wait for them to choose a spot
-// 7. Make move on that spot
-// 8. Check if anyone has won game -> end game
-// 9. Check if board is full -> end game
-//10. Next players turn and repeat 6-10
-function playGame() {
-    name1 = "Brett";
-    marker1 = "x";
-    name2 = "Priscilla";
-    marker2 = "o";
-    player1 = createPlayer(name1, marker1);
-    player2 = createPlayer(name2, marker2);
-    let turnsCount = 0;
-    while (!gameOver()) {
-        const currPlayer = (turnsCount % 2 === 0) ? player2 : player1;
-        let successfulMove = false;
-        while (!successfulMove) {
-            // Wait for player to choos
-            // Hmmmm I may need to rethink approach.
-        }
-        turnsCount++;
+// UI controller
+const uiController = (function() {
+    // ---- Renders game elements ----
+    // ---- Captures player inputs and interactions ----
+    // Add event listeners to the squares
+    squareElems = document.querySelectorAll(".square");
+    squareElems.forEach(squareEl => {
+        squareEl.addEventListener('click', function() {
+            PubSub.publish('squareClicked', {index: squareEl.dataset.index});
+        });
+    });
+    // Add event listener to start button
+    startBtn = document.querySelector("#start-btn");
+    startBtn.addEventListener('click', () => {
+        // Get player names and pass along with the publish message
+        const playerXName = document.querySelector('#player-x-name').value;
+        const playerOName = document.querySelector('#player-o-name').value;
+        PubSub.publish('startBtnClicked', { playerXName, playerOName });
+    });
+
+    // Render gameboard
+    function updateGameboard() {
+        squareElems.forEach(squareEl => {
+            const index = squareEl.dataset.index;
+            const square = gameboard.squares[index];
+            if (square.occupyingPlayer !== null) {
+                squareEl.textContent = square.occupyingPlayer.marker;
+            }
+        });
     }
 
-}
+    return { updateGameboard }
+
+})();
+
+// Player Info
+const players = (function() {
+    let x, o;
+    
+})();
+
+// Game controller
+const gameController = (function() {
+    let playerX, playerO;
+    let currPlayer;
+    let gameStarted = false;
+    let readyForMove = false;
+
+    // function getPlayerX() {
+    //     return playerX;
+    // }
+
+    // function getPlayerO() {
+    //     return playerO;
+    // }
+
+    function initPlayers(playerXName, playerOName) {
+        playerX = createPlayer(playerXName, 'x');
+        playerO = createPlayer(playerOName, 'o');
+    }
+
+    function nextPlayer() {
+        if (currPlayer === playerX) {
+            currPlayer = playerO;
+        } else {
+            currPlayer = playerX;
+        }
+    }
+
+    function startGame(data) {
+        if (!gameStarted) {
+            console.log('STARTING GAME!')
+            gameStarted = true;
+            initPlayers(data.playerXName, data.playerOName);
+            currPlayer = playerX;
+            readyForMove = true;
+        } else {
+            console.log('GAME ALREADY STARTED!');
+        }
+    }
+
+    function squareClicked(data) {
+        console.log(data.index);
+        if (readyForMove) {
+            const square = gameboard.squares[data.index];
+            const success = currPlayer.makeMove(square);
+            if (success) {
+                uiController.updateGameboard();
+                nextPlayer();
+            }
+        }
+    }
+
+    PubSub.subscribe('startBtnClicked', function(data) {
+        startGame(data);
+    });
+
+    PubSub.subscribe('squareClicked', function(data) {
+        squareClicked(data);
+    })
+
+    return {};
+})();

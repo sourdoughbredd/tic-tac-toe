@@ -56,6 +56,7 @@ function createGameSquare() {
 //  Properties:
 //      squares - array of Gameboard Square objects
 //  Methods:
+//      checkGameOver() - checks to board to see if game is over
 //      reset() - clear the gameboard
 const gameboard = (function () {
 
@@ -64,6 +65,12 @@ const gameboard = (function () {
         squares.push(createGameSquare());
     }
 
+    // Returns the i-th square (0 indexed)
+    function getSquare(i) {
+        return squares[i];
+    }
+
+    // Checks if the game is over and returns winner
     function checkGameOver() {
         let winner = null;
         let gameOver = false;
@@ -94,11 +101,12 @@ const gameboard = (function () {
         return {gameOver, winner};
     }
 
+    // Resets the gameboard
     function reset() {
         squares.forEach(square => square.clearSquare());
     }
 
-    return {squares, checkGameOver, reset}
+    return {getSquare, checkGameOver, reset}
 })();
 
 // UI controller
@@ -125,7 +133,7 @@ const uiController = (function() {
     function updateGameboard() {
         squareElems.forEach(squareEl => {
             const index = squareEl.dataset.index;
-            const square = gameboard.squares[index];
+            const square = gameboard.getSquare(index);
             if (square.occupyingPlayer !== null) {
                 squareEl.textContent = square.occupyingPlayer.marker;
             }
@@ -172,7 +180,7 @@ const gameController = (function() {
     function squareClicked(data) {
         console.log(data.index);
         if (readyForMove) {
-            const square = gameboard.squares[data.index];
+            const square = gameboard.getSquare(data.index);
             const success = currPlayer.makeMove(square);
             if (success) {
                 uiController.updateGameboard();

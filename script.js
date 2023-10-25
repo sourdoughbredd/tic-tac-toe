@@ -141,9 +141,9 @@ const uiController = (function() {
     // Add event listener to start button
     startBtn = document.querySelector("#start-btn");
     startBtn.addEventListener('click', () => {
-        // Get player names and pass along with the publish message
-        const playerXName = playerXNameEl.value;
-        const playerOName = playerONameEl.value;
+        // Get player names. If name not provided, assign name to be marker type.
+        const playerXName = playerXNameEl.value == "" ? "X" : playerXNameEl.value;
+        const playerOName = playerONameEl.value == "" ? "O" : playerXNameEl.value;
         PubSub.publish('startBtnClicked', { playerXName, playerOName });
     });
 

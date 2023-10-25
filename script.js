@@ -165,16 +165,19 @@ const uiController = (function() {
     function startGame() {
         // Update gameboard
         updateGameboard();
-        // Hide message area
-        // Disable name editing
+        // Hide game menu
         playerXNameEl.disabled = true;
         playerONameEl.disabled = true;
     }
 
-    function endGame() {
+    function endGame(winner) {
         // Display results
-
-        // Re-enable name editing
+        if (winner === null) {
+            console.log('Tie!');
+        } else {
+            console.log(`The winner is ${winner.name}!`);
+        }
+        // Show game menu
         playerXNameEl.disabled = false;
         playerONameEl.disabled = false;
     }
@@ -189,7 +192,6 @@ const gameController = (function() {
     let playerX, playerO;
     let currPlayer;
     let gameStarted = false;
-    let readyForMove = false;
 
     function initPlayers(playerXName, playerOName) {
         playerX = createPlayer(playerXName, 'x');
@@ -212,7 +214,6 @@ const gameController = (function() {
             gameStarted = true;
             initPlayers(data.playerXName, data.playerOName);
             currPlayer = playerX;
-            readyForMove = true;
         } else {
             console.log('GAME ALREADY STARTED!');
         }
@@ -226,14 +227,13 @@ const gameController = (function() {
                 uiController.updateGameboard();
                 const {gameOver, winner} = gameboard.checkGameOver();
                 if (gameOver) {
-                    readyForMove = false;
                     if (winner === null) {
                         console.log(`GAME OVER: It's a tie!`);
                     } else {
                         console.log(`GAME OVER: Winner is ${winner.name}`);
                     }
                     gameStarted = false;
-                    uiController.endGame();
+                    uiController.endGame(winner);
                 } else {
                     nextPlayer();
                 }

@@ -109,9 +109,9 @@ const gameboard = (function () {
     return {getSquare, checkGameOver, reset}
 })();
 
+
 // UI controller
 const uiController = (function() {
-    // ---- Renders game elements ----
     // ---- Captures player inputs and interactions ----
     // Add event listeners to the squares
     squareElems = document.querySelectorAll(".square");
@@ -129,12 +129,15 @@ const uiController = (function() {
         PubSub.publish('startBtnClicked', { playerXName, playerOName });
     });
 
+    // ---- Renders game elements ----
     // Render gameboard
     function updateGameboard() {
         squareElems.forEach(squareEl => {
             const index = squareEl.dataset.index;
             const square = gameboard.getSquare(index);
-            if (square.occupyingPlayer !== null) {
+            if (square.occupyingPlayer === null) {
+                squareEl.textContent = "";
+            } else {
                 squareEl.textContent = square.occupyingPlayer.marker;
             }
         });
@@ -168,6 +171,8 @@ const gameController = (function() {
     function startGame(data) {
         if (!gameStarted) {
             console.log('STARTING GAME!')
+            gameboard.reset();
+            uiController.updateGameboard();
             gameStarted = true;
             initPlayers(data.playerXName, data.playerOName);
             currPlayer = playerX;
@@ -192,6 +197,7 @@ const gameController = (function() {
                     } else {
                         console.log(`GAME OVER: Winner is ${winner.name}`);
                     }
+                    gameStarted = false;
                 } else {
                     nextPlayer();
                 }

@@ -76,27 +76,41 @@ const gameboard = (function () {
         let gameOver = false;
         // Check rows
         for (let i = 0; i < squares.length; i += 3) {
-            const row = squares.slice(i, i+3);
-            if (row.every(square => square === row[0])) {
+            const row = squares.slice(i, i+3).map(square => square.occupyingPlayer);
+            if (row[0] !== null && row[0] === row[1] && row[1] === row[2]) {
                 // Winning row!
-                console.log('WINNING ROW');
                 gameOver = true;
-                winner = row[0].occupyingPlayer;
+                winner = row[0];
                 return {gameOver, winner};
             }
         }
         // Check columns
         for (let i = 0; i < 3; i++) {
-            const col = [squares[i], squares[i+3], squares[i+6]];
-            if (col.every(square => square === col[0])) {
+            const col = [squares[i].occupyingPlayer, squares[i+3].occupyingPlayer, squares[i+6].occupyingPlayer];
+            if (col[0] !== null && col[0] === col[1] && col[1] === col[2]) {
                 // Winning column!
-                console.log('WINNING COLUMN');
                 gameOver = true;
-                winner = col[0].occupyingPlayer;
+                winner = col[0];
                 return {gameOver, winner};
             }
         }
+        // Check diagonals
+        const diag1 = [squares[0].occupyingPlayer, squares[4].occupyingPlayer, squares[8].occupyingPlayer];
+        if (diag1[0] !== null && diag1[0] === diag1[1] && diag1[1] === diag1[2]) {
+            // Winning diagonal #1!
+            gameOver = true;
+            winner = diag1[0];
+            return {gameOver, winner};
+        }
+        const diag2 = [squares[2].occupyingPlayer, squares[4].occupyingPlayer, squares[6].occupyingPlayer];
+        if (diag2[0] !== null && diag2[0] === diag2[1] && diag2[1] === diag2[2]) {
+            // Winning diagonal #2!
+            gameOver = true;
+            winner = diag2[0];
+            return {gameOver, winner};
+        }
 
+        // If no winner was found, see if the board is full
         gameOver = squares.every(square => square.occupyingPlayer !== null); // full board without a winner
         return {gameOver, winner};
     }

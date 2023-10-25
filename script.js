@@ -126,10 +126,14 @@ const gameboard = (function () {
 
 // UI controller
 const uiController = (function() {
+
+    const playerXNameEl = document.querySelector('#player-x-name');
+    const playerONameEl = document.querySelector('#player-o-name');
+    squareEls = document.querySelectorAll(".square");
+
     // ---- Captures player inputs and interactions ----
     // Add event listeners to the squares
-    squareElems = document.querySelectorAll(".square");
-    squareElems.forEach(squareEl => {
+    squareEls.forEach(squareEl => {
         squareEl.addEventListener('click', function() {
             PubSub.publish('squareClicked', {index: squareEl.dataset.index});
         });
@@ -138,15 +142,15 @@ const uiController = (function() {
     startBtn = document.querySelector("#start-btn");
     startBtn.addEventListener('click', () => {
         // Get player names and pass along with the publish message
-        const playerXName = document.querySelector('#player-x-name').value;
-        const playerOName = document.querySelector('#player-o-name').value;
+        const playerXName = playerXNameEl.value;
+        const playerOName = playerONameEl.value;
         PubSub.publish('startBtnClicked', { playerXName, playerOName });
     });
 
     // ---- Renders game elements ----
     // Render gameboard
     function updateGameboard() {
-        squareElems.forEach(squareEl => {
+        squareEls.forEach(squareEl => {
             const index = squareEl.dataset.index;
             const square = gameboard.getSquare(index);
             if (square.occupyingPlayer === null) {
@@ -157,7 +161,25 @@ const uiController = (function() {
         });
     }
 
-    return { updateGameboard }
+    // Updates UI when game starts
+    function startGame() {
+        // Update gameboard
+        updateGameboard();
+        // Hide message area
+        // Disable name editing
+        playerXNameEl.disabled = true;
+        playerONameEl.disabled = true;
+    }
+
+    function endGame() {
+        // Display results
+
+        // Re-enable name editing
+        playerXNameEl.disabled = false;
+        playerONameEl.disabled = false;
+    }
+
+    return { updateGameboard, startGame, endGame }
 
 })();
 
@@ -186,7 +208,7 @@ const gameController = (function() {
         if (!gameStarted) {
             console.log('STARTING GAME!')
             gameboard.reset();
-            uiController.updateGameboard();
+            uiController.startGame();
             gameStarted = true;
             initPlayers(data.playerXName, data.playerOName);
             currPlayer = playerX;
@@ -197,8 +219,7 @@ const gameController = (function() {
     }
 
     function squareClicked(data) {
-        console.log(data.index);
-        if (readyForMove) {
+        if (gameStarted) {
             const square = gameboard.getSquare(data.index);
             const success = currPlayer.makeMove(square);
             if (success) {
@@ -212,6 +233,7 @@ const gameController = (function() {
                         console.log(`GAME OVER: Winner is ${winner.name}`);
                     }
                     gameStarted = false;
+                    uiController.endGame();
                 } else {
                     nextPlayer();
                 }

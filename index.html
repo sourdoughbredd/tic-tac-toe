@@ -7,11 +7,6 @@
   <title>Tic-Tac-Toe</title>
 </head>
 <body>
-  <label for="player-x-name">X</label>
-  <input type="text" name="player-x-name" id="player-x-name">
-  <label for="player-o">O</label>
-  <input type="text" name="player-o-name" id="player-o-name">
-  <button type="button" id="start-btn">Start</button>
   <div class="gameboard">
     <div class="square" data-index="0"></div>
     <div class="square" data-index="1"></div>
@@ -22,6 +17,20 @@
     <div class="square" data-index="6"></div>
     <div class="square" data-index="7"></div>
     <div class="square" data-index="8"></div>
+    <div class="menu">
+      <span id="instructions">Enter your names and press start to begin!</span>
+      <div class="player-container">
+        <div class="player">
+          <input type="text" name="player-x-name" id="player-x-name" required>
+          <span>X</span>
+        </div>
+        <div class="player">
+          <input type="text" name="player-o-name" id="player-o-name" required>
+          <span>O</span>
+        </div>
+      </div>
+      <button type="submit" id="start-btn">Start</button>
+    </div>
   </div>
 </body>
 </html>

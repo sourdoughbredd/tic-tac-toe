@@ -1,18 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap');
+
+:root {
+  --bg-color: rgb(56, 58, 71);
+}
+
+body {
+  background-color: var(--bg-color);
+  font-family: 'Roboto', sans-serif;
+}
+
 .gameboard {
-  border: 2px solid black;
+  /* border: 1px solid magenta; */
+  background-color: black;
   width: 500px;
   height: 500px;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr;
+  gap: 6px;
+  position: relative;
 }
 
 .square {
-  border: 2px solid black;
+  font-family: 'Playpen Sans', cursive;
+  color: white;
+  text-transform: uppercase;
+  background-color: var(--bg-color);
   font-size: 64px;
   text-align: center;
+  display: grid;
+  place-items: center;
 }
 
 .square:hover {
+  cursor: pointer;
+}
+
+.menu {
+  position: absolute;
+  background-color: rgb(208, 195, 209);
+  color: black;
+  border-radius: 12px;
+  width: 400px;
+  height: 250px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 12px;
+  display: grid;
+  place-items: center;
+}
+.menu #instructions {
+  text-align: center;
+  font-size: 20px;
+  padding: 0 24px;
+}
+
+.player-container {
+  display: flex;
+  gap: 24px;
+}
+
+.player {
+  position: relative;
+}
+
+.player input[type=text] {
+  background-color: rgba(70, 53, 53, 0.839);
+  border: none;
+  border-radius: 10px;;
+  width: 150px;
+  height: 36px;
+  z-index: 2;
+  position: relative;
+  font-size: 24px;
+  text-align: center;
+  color: rgb(234, 234, 234);
+}
+
+.player span {
+  font-family: 'Playpen Sans', cursive;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 100px;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+#start-btn {
+  background-color: rgb(192, 19, 13);
+  color: white;
+  border: none;
+  width: 120px;
+  height: 40px;
+  border-radius: 20px;
+  font-size: 18px;
+  text-transform: uppercase;
   cursor: pointer;
 }

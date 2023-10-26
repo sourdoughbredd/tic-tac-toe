@@ -163,27 +163,33 @@ const uiController = (function() {
     }
 
     // Updates UI when game starts
+    const menuEl = document.querySelector(".menu");
     const playerXNameIn = document.querySelector('#player-x-name');
     const playerONameIn = document.querySelector('#player-o-name');
     const gameInfoEl = document.querySelector(".game-info");
-    const menuEl = document.querySelector(".menu");
+    const playerXNameEl = document.querySelector('#player-x .name');
+    const playerONameEl = document.querySelector('#player-o .name');
+    const playerXMarkerEl = document.querySelector('#player-x .marker');
+    const playerOMarkerEl = document.querySelector('#player-o .marker');
+
     function startGame() {
         // Update gameboard
         updateGameboard();
         // Hide game menu
         menuEl.classList.add('hidden');
-        // Update game info with player names
-        gameInfoEl.querySelector('#player-x .name').innerText = playerXNameIn.value;
-        gameInfoEl.querySelector('#player-o .name').innerText = playerONameIn.value;
+        // Get player names
+        playerXName = playerXNameIn.value;
+        playerOName = playerONameIn.value;
+        // Update in-game name display
+        playerXNameEl.innerText = playerXName;
+        playerONameEl.innerText = playerOName;
         // Show game info (player names and markers)
         gameInfoEl.classList.remove('hidden');
-        // Check names (should probably move this to another module!)
-        const playerXName = playerXNameIn.value == "" ? "X" : playerXNameIn.value;
-        const playerOName = playerONameIn.value == "" ? "O" : playerONameIn.value;
-
+        // Return the names for others to use
         return { playerXName, playerOName };
     }
 
+    // Updates UI when game ends
     function endGame(winner) {
         // Display results
         if (winner === null) {
@@ -196,7 +202,20 @@ const uiController = (function() {
         menuEl.classList.remove('hidden');
     }
 
-    return { updateGameboard, startGame, endGame }
+    // Updates UI when current player changes
+    function updateActivePlayer(player) {
+        if (player.marker == 'x') {
+            playerXMarkerEl.style.opacity = 1;
+            playerOMarkerEl.style.opacity = 0.1;
+        } else if (player.marker == 'o') {
+            playerXMarkerEl.style.opacity = 0.1;
+            playerOMarkerEl.style.opacity = 1;
+        } else {
+            /// Do nothing.
+        }
+    }
+
+    return { updateGameboard, startGame, endGame, updateActivePlayer }
 
 })();
 
@@ -228,13 +247,23 @@ const gameController = (function() {
         }
     }
 
+    // Randomly chooses x or y (with equal probability) and returns the choice. 
+    function randomChoice(x, y) {
+            return Math.random() < 0.5 ? x : y;
+    }
+
     function startGame(data) {
         if (!gameStarted) {
+            // Check names
+            const playerXName = data.playerXName == "" ? "X" : data.playerXName;
+            const playerOName = data.playerOName == "" ? "O" : data.playerOName;
+            // Start game
             gameStarted = true;
             gameboard.reset();
             uiController.startGame();
-            initPlayers(data.playerXName, data.playerOName);
-            currPlayer = playerX;
+            initPlayers(playerXName, playerOName);
+            currPlayer = randomChoice(playerX, playerO);
+            uiController.updateActivePlayer(currPlayer);
         } else {
             // Do nothing. Game already started.
         }
@@ -252,6 +281,7 @@ const gameController = (function() {
                     uiController.endGame(winner);
                 } else {
                     nextPlayer();
+                    uiController.updateActivePlayer(currPlayer);
                 }
             }
         }

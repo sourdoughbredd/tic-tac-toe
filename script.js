@@ -128,27 +128,27 @@ const gameboard = (function () {
 // UI controller
 const uiController = (function() {
 
-    const playerXNameEl = document.querySelector('#player-x-name');
-    const playerONameEl = document.querySelector('#player-o-name');
     squareEls = document.querySelectorAll(".square");
 
     // ---- Captures player inputs and interactions ----
+
     // Add event listeners to the squares
     squareEls.forEach(squareEl => {
         squareEl.addEventListener('click', function() {
             PubSub.publish('squareClicked', {index: squareEl.dataset.index});
         });
     });
+
     // Add event listener to start button
     startBtn = document.querySelector("#start-btn");
     startBtn.addEventListener('click', () => {
         // Get player names. If name not provided, assign name to be marker type.
-        const playerXName = playerXNameEl.value == "" ? "X" : playerXNameEl.value;
-        const playerOName = playerONameEl.value == "" ? "O" : playerXNameEl.value;
+        ({ playerXName, playerOName } = startGame());
         PubSub.publish('startBtnClicked', { playerXName, playerOName });
     });
 
     // ---- Renders game elements ----
+
     // Render gameboard
     function updateGameboard() {
         squareEls.forEach(squareEl => {
@@ -163,12 +163,25 @@ const uiController = (function() {
     }
 
     // Updates UI when game starts
+    const playerXNameIn = document.querySelector('#player-x-name');
+    const playerONameIn = document.querySelector('#player-o-name');
+    const gameInfoEl = document.querySelector(".game-info");
+    const menuEl = document.querySelector(".menu");
     function startGame() {
         // Update gameboard
         updateGameboard();
         // Hide game menu
-        playerXNameEl.disabled = true;
-        playerONameEl.disabled = true;
+        menuEl.classList.add('hidden');
+        // Update game info with player names
+        gameInfoEl.querySelector('#player-x .name').innerText = playerXNameIn.value;
+        gameInfoEl.querySelector('#player-o .name').innerText = playerONameIn.value;
+        // Show game info (player names and markers)
+        gameInfoEl.classList.remove('hidden');
+        // Check names (should probably move this to another module!)
+        const playerXName = playerXNameIn.value == "" ? "X" : playerXNameIn.value;
+        const playerOName = playerONameIn.value == "" ? "O" : playerXNameIn.value;
+
+        return { playerXName, playerOName };
     }
 
     function endGame(winner) {
@@ -179,8 +192,6 @@ const uiController = (function() {
             console.log(`The winner is ${winner.name}!`);
         }
         // Show game menu
-        playerXNameEl.disabled = false;
-        playerONameEl.disabled = false;
     }
 
     return { updateGameboard, startGame, endGame }
@@ -210,9 +221,9 @@ const gameController = (function() {
     function startGame(data) {
         if (!gameStarted) {
             console.log('STARTING GAME!')
+            gameStarted = true;
             gameboard.reset();
             uiController.startGame();
-            gameStarted = true;
             initPlayers(data.playerXName, data.playerOName);
             currPlayer = playerX;
         } else {

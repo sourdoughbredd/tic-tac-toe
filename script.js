@@ -60,6 +60,7 @@ function createGameSquare() {
 //      reset() - clear the gameboard
 const gameboard = (function () {
 
+    // Store the gameboard as a 1D array of squares
     const squares = [];
     for (let i = 0; i < 9; i++) {
         squares.push(createGameSquare());

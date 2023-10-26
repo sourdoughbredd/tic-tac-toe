@@ -179,7 +179,7 @@ const uiController = (function() {
         gameInfoEl.classList.remove('hidden');
         // Check names (should probably move this to another module!)
         const playerXName = playerXNameIn.value == "" ? "X" : playerXNameIn.value;
-        const playerOName = playerONameIn.value == "" ? "O" : playerXNameIn.value;
+        const playerOName = playerONameIn.value == "" ? "O" : playerONameIn.value;
 
         return { playerXName, playerOName };
     }
@@ -187,11 +187,13 @@ const uiController = (function() {
     function endGame(winner) {
         // Display results
         if (winner === null) {
-            console.log('Tie!');
+            results = "It's a tie!";
         } else {
-            console.log(`The winner is ${winner.name}!`);
+            results = `The winner is ${winner.name}!`;
         }
+        menuEl.querySelector('#instructions').innerText = results + " Enter names and press START to play again!";
         // Show game menu
+        menuEl.classList.remove('hidden');
     }
 
     return { updateGameboard, startGame, endGame }
@@ -204,6 +206,14 @@ const gameController = (function() {
     let playerX, playerO;
     let currPlayer;
     let gameStarted = false;
+
+    PubSub.subscribe('startBtnClicked', function(data) {
+        startGame(data);
+    });
+
+    PubSub.subscribe('squareClicked', function(data) {
+        squareClicked(data);
+    })
 
     function initPlayers(playerXName, playerOName) {
         playerX = createPlayer(playerXName, 'x');
@@ -220,14 +230,13 @@ const gameController = (function() {
 
     function startGame(data) {
         if (!gameStarted) {
-            console.log('STARTING GAME!')
             gameStarted = true;
             gameboard.reset();
             uiController.startGame();
             initPlayers(data.playerXName, data.playerOName);
             currPlayer = playerX;
         } else {
-            console.log('GAME ALREADY STARTED!');
+            // Do nothing. Game already started.
         }
     }
 
@@ -239,11 +248,6 @@ const gameController = (function() {
                 uiController.updateGameboard();
                 const {gameOver, winner} = gameboard.checkGameOver();
                 if (gameOver) {
-                    if (winner === null) {
-                        console.log(`GAME OVER: It's a tie!`);
-                    } else {
-                        console.log(`GAME OVER: Winner is ${winner.name}`);
-                    }
                     gameStarted = false;
                     uiController.endGame(winner);
                 } else {
@@ -252,14 +256,4 @@ const gameController = (function() {
             }
         }
     }
-
-    PubSub.subscribe('startBtnClicked', function(data) {
-        startGame(data);
-    });
-
-    PubSub.subscribe('squareClicked', function(data) {
-        squareClicked(data);
-    })
-
-    return {};
 })();

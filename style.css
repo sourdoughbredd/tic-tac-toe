@@ -62,6 +62,7 @@ body {
   place-items: center;
   gap: 60px;
 }
+
 .menu #instructions {
   text-align: center;
   font-size: 24px;
@@ -90,8 +91,7 @@ body {
   color: rgb(234, 234, 234);
 }
 
-.menu .player .marker,
-.game-info .player .marker {
+.marker {
   font-family: 'Playpen Sans', cursive;
   font-weight: 700;
   position: absolute;
@@ -108,6 +108,7 @@ body {
   background-color: rgb(162, 13, 8);
   color: white;
   border: none;
+  box-shadow: 2px 2px 6px rgb(88, 88, 88);
   width: 130px;
   height: 40px;
   border-radius: 30px;
@@ -135,21 +136,9 @@ body {
   position: relative;
   font-size: 25px;
   text-align: center;
-  color: rgb(234, 234, 234);
+  color: #eaeaea;
   min-width: 100px;
-}
-
-.game-info .player .marker {
-  font-family: 'Playpen Sans', cursive;
-  font-weight: 700;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 120px;
-  pointer-events: none;
   user-select: none;
-  z-index: 1;
 }
 
 /* "VS" text*/

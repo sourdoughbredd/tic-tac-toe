@@ -49,7 +49,7 @@ body {
 
 .menu {
   position: absolute;
-  background-color: rgb(208, 195, 209);
+  background-color: rgba(208, 195, 209, 0.919);
   color: black;
   border-radius: 12px;
   box-shadow: 2px 2px 8px black;
@@ -136,6 +136,7 @@ body {
   font-size: 25px;
   text-align: center;
   color: rgb(234, 234, 234);
+  min-width: 100px;
 }
 
 .game-info .player .marker {
